@@ -12,7 +12,7 @@ void move_to_front(int byte) {
 	for (int i = index; i; --i)
 		table[i] = table[i - 1];
 	table[0] = byte;
-	for (int i = 0; i < 256; ++i)
+	for (int i = 0; i <= index; ++i)
 		itable[table[i]] = i;
 }
 
