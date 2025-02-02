@@ -17,10 +17,11 @@ int main() {
 	for (int i = 32; i < 127; ++i)
 		if (!strchr((char *)table, i))
 			printf("%2x: [%c]\n", *p++ = i, i);
+	for (int i = 1; i < 32; ++i)
+		*p++ = i;
 	for (int i = 127; i < 256; ++i)
 		*p++ = i;
-	for (int i = 0; i < 32; ++i)
-		*p++ = i;
+	*p++ = 0;
 	printf("count = %ld\n", p - table);
 	static unsigned char itable[256];
 	for (int i = 0; i < 256; ++i)
