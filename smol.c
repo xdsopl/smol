@@ -6,6 +6,7 @@ Copyright 2025 Ahmet Inan <xdsopl@gmail.com>
 
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 #include "table.h"
 
 int main() {
@@ -21,5 +22,10 @@ int main() {
 	for (int i = 0; i < 32; ++i)
 		*p++ = i;
 	printf("count = %ld\n", p - table);
+	static unsigned char itable[256];
+	for (int i = 0; i < 256; ++i)
+		itable[table[i]] = i;
+	for (int i = 0; i < 256; ++i)
+		assert(table[itable[i]] == i);
 	return 0;
 }
