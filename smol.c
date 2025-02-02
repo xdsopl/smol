@@ -28,5 +28,12 @@ int main() {
 		itable[table[i]] = i;
 	for (int i = 0; i < 256; ++i)
 		assert(table[itable[i]] == i);
+	printf("static const unsigned char table[256] = { ");
+	for (int i = 0; i < 256; ++i)
+		printf("%d, ", table[i]);
+	printf("};\nstatic const unsigned char itable[256] = { ");
+	for (int i = 0; i < 256; ++i)
+		printf("%d, ", itable[i]);
+	printf("};\n");
 	return 0;
 }
