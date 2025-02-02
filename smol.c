@@ -7,6 +7,15 @@ Copyright 2025 Ahmet Inan <xdsopl@gmail.com>
 #include "vli.h"
 #include "table.h"
 
+void move_to_front(int byte) {
+	int index = itable[byte];
+	for (int i = index; i; --i)
+		table[i] = table[i - 1];
+	table[0] = byte;
+	for (int i = 0; i < 256; ++i)
+		itable[table[i]] = i;
+}
+
 int main(int argc, char **argv) {
 	if (argc != 2)
 		return 1;
@@ -15,9 +24,11 @@ int main(int argc, char **argv) {
 	int enc = *argv[1] == 'e';
 	if (enc) {
 		int byte;
-		while ((byte = getbyte()) >= 0)
+		while ((byte = getbyte()) >= 0) {
 			if (putval(itable[byte]))
 				return 1;
+			move_to_front(byte);
+		}
 		if (putval(itable[0]))
 			return 1;
 		flush_bits();
@@ -27,6 +38,7 @@ int main(int argc, char **argv) {
 			int byte = table[value];
 			if (!byte)
 				break;
+			move_to_front(byte);
 			if (putbyte(byte))
 				return 1;
 		}
