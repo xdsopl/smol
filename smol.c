@@ -10,10 +10,8 @@ Copyright 2025 Ahmet Inan <xdsopl@gmail.com>
 void move_to_front(int byte) {
 	int index = itable[byte];
 	for (int i = index; i; --i)
-		table[i] = table[i - 1];
-	table[0] = byte;
-	for (int i = 0; i <= index; ++i)
-		itable[table[i]] = i;
+		itable[table[i] = table[i - 1]] = i;
+	itable[table[0] = byte] = 0;
 }
 
 int main(int argc, char **argv) {
