@@ -38,32 +38,21 @@ void bwt() {
 		obuffer[i] = ibuffer[(rotations[i] + length - 1) % length];
 }
 
-void swap(unsigned char *buffer, int a, int b) {
-	unsigned char tmp = buffer[a];
-	buffer[a] = buffer[b];
-	buffer[b] = tmp;
-}
-
 void ibwt() {
-	static unsigned char firstColumn[BUFFER];
-	for (int i = 0; i < length; ++i)
-		firstColumn[i] = ibuffer[i];
-	for (int i = 0; i < length - 1; ++i)
-		for (int j = 0; j < length - i - 1; ++j)
-			if (firstColumn[j] > firstColumn[j + 1])
-				swap(firstColumn, j, j + 1);
-	static int countLast[256];
+	static int frequency[256];
 	for (int i = 0; i < 256; ++i)
-		countLast[i] = 0;
+		frequency[i] = 0;
+	for (int i = 0; i < length; ++i)
+		++frequency[ibuffer[i]];
+	static int firstOccurrence[256];
+	for (int i = 1; i < 256; ++i)
+		firstOccurrence[i] = firstOccurrence[i - 1] + frequency[i - 1];
+	static int occurrenceCount[256];
+	for (int i = 0; i < 256; ++i)
+		occurrenceCount[i] = 0;
 	static int rankLast[BUFFER];
 	for (int i = 0; i < length; ++i)
-		rankLast[i] = ++countLast[ibuffer[i]];
-	static int firstOccurrence[256];
-	for (int i = 0; i < 256; ++i)
-		firstOccurrence[i] = -1;
-	for (int i = 0; i < length; ++i)
-		if (firstOccurrence[firstColumn[i]] < 0)
-			firstOccurrence[firstColumn[i]] = i;
+		rankLast[i] = ++occurrenceCount[ibuffer[i]];
 	static int lfMap[BUFFER];
 	for (int i = 0; i < length; ++i)
 		lfMap[i] = firstOccurrence[ibuffer[i]] + rankLast[i] - 1;
