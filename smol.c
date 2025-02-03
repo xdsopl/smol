@@ -38,6 +38,11 @@ void bwt() {
 		obuffer[i] = ibuffer[(rotations[i] + length - 1) % length];
 }
 
+void ibwt() {
+	for (int i = 0; i < length; ++i)
+		obuffer[i] = ibuffer[i];
+}
+
 int main(int argc, char **argv) {
 	if (argc != 2)
 		return 1;
@@ -74,8 +79,9 @@ int main(int argc, char **argv) {
 			}
 			if (!length)
 				break;
+			ibwt();
 			for (int i = 0; i < length; ++i) {
-				int symbol = ibuffer[i];
+				int symbol = obuffer[i];
 				if (symbol < 32 || symbol >= 127)
 					symbol = '?';
 				fputc(symbol, stderr);
