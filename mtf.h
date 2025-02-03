@@ -13,6 +13,23 @@ void init_mtf() {
 		itable[table[i]] = i;
 }
 
+void print_table() {
+	for (unsigned char *p = table; *p; ++p)
+		if (*p == '\n')
+			printf(" '\\n',");
+		else if (*p == '\t')
+			printf(" '\\t',");
+		else if (*p == '\'')
+			printf(" '\\\'',");
+		else if (*p == '\\')
+			printf(" '\\\\',");
+		else if (*p >= 32 && *p < 127)
+			printf(" '%c',", *p);
+		else
+			printf(" %d,", *p);
+	printf(" 0\n");
+}
+
 void move_to_front(int symbol) {
 	for (int i = itable[symbol]; i; --i)
 		itable[table[i] = table[i - 1]] = i;

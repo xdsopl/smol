@@ -10,6 +10,10 @@ Copyright 2025 Ahmet Inan <xdsopl@gmail.com>
 int main(int argc, char **argv) {
 	if (argc != 2)
 		return 1;
+	if (*argv[1] == 't') {
+		print_table();
+		return 0;
+	}
 	if (*argv[1] != 'e' && *argv[1] != 'd')
 		return 1;
 	int enc = *argv[1] == 'e';
