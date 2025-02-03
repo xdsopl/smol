@@ -5,13 +5,7 @@ Copyright 2025 Ahmet Inan <xdsopl@gmail.com>
 */
 
 #include "vli.h"
-#include "table.h"
-
-void move_to_front(int byte) {
-	for (int i = itable[byte]; i; --i)
-		itable[table[i] = table[i - 1]] = i;
-	itable[table[0] = byte] = 0;
-}
+#include "mtf.h"
 
 int main(int argc, char **argv) {
 	if (argc != 2)
@@ -19,12 +13,12 @@ int main(int argc, char **argv) {
 	if (*argv[1] != 'e' && *argv[1] != 'd')
 		return 1;
 	int enc = *argv[1] == 'e';
+	init_mtf();
 	if (enc) {
-		int byte;
-		while ((byte = getbyte()) >= 0) {
-			if (putval(itable[byte]))
+		int symbol;
+		while ((symbol = getbyte()) >= 0) {
+			if (putval(get_value(symbol)))
 				return 1;
-			move_to_front(byte);
 		}
 		if (putval(itable[0]))
 			return 1;
@@ -32,11 +26,10 @@ int main(int argc, char **argv) {
 	} else {
 		int value;
 		while ((value = getval()) >= 0) {
-			int byte = table[value];
-			if (!byte)
+			int symbol = get_symbol(value);
+			if (!symbol)
 				break;
-			move_to_front(byte);
-			if (putbyte(byte))
+			if (putbyte(symbol))
 				return 1;
 		}
 	}
