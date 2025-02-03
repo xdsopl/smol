@@ -9,7 +9,7 @@ Copyright 2025 Ahmet Inan <xdsopl@gmail.com>
 #include <stdlib.h>
 
 static int length;
-#define BUFFER 4096
+#define BUFFER 65536
 
 static int length;
 static unsigned char ibuffer[BUFFER], obuffer[BUFFER];
