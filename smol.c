@@ -38,9 +38,40 @@ void bwt() {
 		obuffer[i] = ibuffer[(rotations[i] + length - 1) % length];
 }
 
+void swap(unsigned char *buffer, int a, int b) {
+	unsigned char tmp = buffer[a];
+	buffer[a] = buffer[b];
+	buffer[b] = tmp;
+}
+
 void ibwt() {
+	static unsigned char firstColumn[BUFFER];
 	for (int i = 0; i < length; ++i)
-		obuffer[i] = ibuffer[i];
+		firstColumn[i] = ibuffer[i];
+	for (int i = 0; i < length - 1; ++i)
+		for (int j = 0; j < length - i - 1; ++j)
+			if (firstColumn[j] > firstColumn[j + 1])
+				swap(firstColumn, j, j + 1);
+	static int countLast[256];
+	for (int i = 0; i < 256; ++i)
+		countLast[i] = 0;
+	static int rankLast[BUFFER];
+	for (int i = 0; i < length; ++i)
+		rankLast[i] = ++countLast[ibuffer[i]];
+	static int firstOccurrence[256];
+	for (int i = 0; i < 256; ++i)
+		firstOccurrence[i] = -1;
+	for (int i = 0; i < length; ++i)
+		if (firstOccurrence[firstColumn[i]] < 0)
+			firstOccurrence[firstColumn[i]] = i;
+	static int lfMap[BUFFER];
+	for (int i = 0; i < length; ++i)
+		lfMap[i] = firstOccurrence[ibuffer[i]] + rankLast[i] - 1;
+	int row = 0;
+	while (row < length && ibuffer[row] != ETX)
+		++row;
+	for (int i = length-1; i >= 0; --i, row = lfMap[row])
+		obuffer[i] = ibuffer[row];
 }
 
 int main(int argc, char **argv) {
@@ -57,7 +88,7 @@ int main(int argc, char **argv) {
 	if (enc) {
 		while ((length = fread(ibuffer, 1, BUFFER-1, stdin)) > 0) {
 			read_bytes += length;
-			ibuffer[length] = ETX;
+			ibuffer[length++] = ETX;
 			bwt();
 			for (int i = 0; i < length; ++i)
 				if (putval(get_value(obuffer[i])))
@@ -80,13 +111,9 @@ int main(int argc, char **argv) {
 			if (!length)
 				break;
 			ibwt();
-			for (int i = 0; i < length; ++i) {
-				int symbol = obuffer[i];
-				if (symbol < 32 || symbol >= 127)
-					symbol = '?';
-				fputc(symbol, stderr);
-			}
-			fputc('\n', stderr);
+			if (length-1 != (int)fwrite(obuffer, 1, length-1, stdout))
+				return 1;
+			wrote_bytes += length-1;
 		} while (length == BUFFER);
 	}
 	double change = 100.0 * (wrote_bytes - read_bytes) / read_bytes;
