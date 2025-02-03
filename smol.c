@@ -13,20 +13,29 @@ Copyright 2025 Ahmet Inan <xdsopl@gmail.com>
 #define EOT 4
 
 static int length;
-static unsigned char buffer[BUFFER];
+static unsigned char ibuffer[BUFFER], obuffer[BUFFER];
 
 int compare(const void *a, const void *b) {
 	int x = *(const int *)a;
 	int y = *(const int *)b;
 	for (int i = 0; i < length; ++i) {
-		int l = buffer[(x + i) % length];
-		int r = buffer[(y + i) % length];
+		int l = ibuffer[(x + i) % length];
+		int r = ibuffer[(y + i) % length];
 		if (l < r)
 			return -1;
 		if (l > r)
 			return 1;
 	}
 	return 0;
+}
+
+void bwt() {
+	static int rotations[BUFFER];
+	for (int i = 0; i < length; ++i)
+		rotations[i] = i;
+	qsort(rotations, length, sizeof(int), compare);
+	for (int i = 0; i < length; ++i)
+		obuffer[i] = ibuffer[(rotations[i] + length - 1) % length];
 }
 
 int main(int argc, char **argv) {
@@ -41,15 +50,12 @@ int main(int argc, char **argv) {
 	int enc = *argv[1] == 'e';
 	init_mtf();
 	if (enc) {
-		while ((length = fread(buffer, 1, BUFFER-1, stdin)) > 0) {
+		while ((length = fread(ibuffer, 1, BUFFER-1, stdin)) > 0) {
 			read_bytes += length;
-			buffer[length] = ETX;
-			static int rotations[BUFFER];
+			ibuffer[length] = ETX;
+			bwt();
 			for (int i = 0; i < length; ++i)
-				rotations[i] = i;
-			qsort(rotations, length, sizeof(int), compare);
-			for (int i = 0; i < length; ++i)
-				if (putval(get_value(buffer[(rotations[i] + length - 1) % length])))
+				if (putval(get_value(obuffer[i])))
 					return 1;
 		}
 		if (putval(get_value(EOT)))
@@ -64,12 +70,12 @@ int main(int argc, char **argv) {
 				int symbol = get_symbol(value);
 				if (symbol == EOT)
 					break;
-				buffer[length] = symbol;
+				ibuffer[length] = symbol;
 			}
 			if (!length)
 				break;
 			for (int i = 0; i < length; ++i) {
-				int symbol = buffer[i];
+				int symbol = ibuffer[i];
 				if (symbol < 32 || symbol >= 127)
 					symbol = '?';
 				fputc(symbol, stderr);
