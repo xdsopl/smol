@@ -8,8 +8,7 @@ Copyright 2025 Ahmet Inan <xdsopl@gmail.com>
 #include "table.h"
 
 void move_to_front(int byte) {
-	int index = itable[byte];
-	for (int i = index; i; --i)
+	for (int i = itable[byte]; i; --i)
 		itable[table[i] = table[i - 1]] = i;
 	itable[table[0] = byte] = 0;
 }
