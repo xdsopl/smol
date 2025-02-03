@@ -4,6 +4,7 @@ Compression of English text
 Copyright 2025 Ahmet Inan <xdsopl@gmail.com>
 */
 
+#include <stdlib.h>
 #include "vli.h"
 #include "mtf.h"
 
@@ -11,6 +12,20 @@ Copyright 2025 Ahmet Inan <xdsopl@gmail.com>
 
 static int length;
 static unsigned char buffer[BUFFER];
+
+int compare(const void *a, const void *b) {
+	int x = *(const int *)a;
+	int y = *(const int *)b;
+	for (int i = 0; i < length; ++i) {
+		int l = buffer[(x + i) % length];
+		int r = buffer[(y + i) % length];
+		if (l < r)
+			return -1;
+		if (l > r)
+			return 1;
+	}
+	return 0;
+}
 
 int main(int argc, char **argv) {
 	if (argc != 2)
@@ -29,6 +44,17 @@ int main(int argc, char **argv) {
 			for (int i = 0; i < length; ++i)
 				if (putval(get_value(buffer[i])))
 					return 1;
+			static int rotations[BUFFER];
+			for (int i = 0; i < length; ++i)
+				rotations[i] = i;
+			qsort(rotations, length, sizeof(int), compare);
+			for (int i = 0; i < length; ++i) {
+				int symbol = buffer[(rotations[i] + length - 1) % length];
+				if (symbol < 32 || symbol >= 127)
+					symbol = '?';
+				fputc(symbol, stderr);
+			}
+			fputc('\n', stderr);
 		}
 		if (putval(itable[0]))
 			return 1;
