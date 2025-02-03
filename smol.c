@@ -39,27 +39,27 @@ void bwt() {
 }
 
 void ibwt() {
-	static int frequency[256];
+	static int freq[256];
 	for (int i = 0; i < 256; ++i)
-		frequency[i] = 0;
+		freq[i] = 0;
 	for (int i = 0; i < length; ++i)
-		++frequency[ibuffer[i]];
-	static int firstOccurrence[256];
+		++freq[ibuffer[i]];
+	static int first[256];
 	for (int i = 1; i < 256; ++i)
-		firstOccurrence[i] = firstOccurrence[i - 1] + frequency[i - 1];
-	static int occurrenceCount[256];
+		first[i] = first[i - 1] + freq[i - 1];
+	static int count[256];
 	for (int i = 0; i < 256; ++i)
-		occurrenceCount[i] = 0;
-	static int rankLast[BUFFER];
+		count[i] = 0;
+	static int last[BUFFER];
 	for (int i = 0; i < length; ++i)
-		rankLast[i] = ++occurrenceCount[ibuffer[i]];
-	static int lfMap[BUFFER];
+		last[i] = ++count[ibuffer[i]];
+	static int lfm[BUFFER];
 	for (int i = 0; i < length; ++i)
-		lfMap[i] = firstOccurrence[ibuffer[i]] + rankLast[i] - 1;
+		lfm[i] = first[ibuffer[i]] + last[i] - 1;
 	int row = 0;
 	while (row < length && ibuffer[row] != ETX)
 		++row;
-	for (int i = length-1; i >= 0; --i, row = lfMap[row])
+	for (int i = length-1; i >= 0; --i, row = lfm[row])
 		obuffer[i] = ibuffer[row];
 }
 
