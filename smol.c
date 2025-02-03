@@ -8,7 +8,7 @@ Copyright 2025 Ahmet Inan <xdsopl@gmail.com>
 #include "vli.h"
 #include "mtf.h"
 
-#define BUFFER 256
+#define BUFFER 4096
 #define ETX 3
 #define EOT 4
 
