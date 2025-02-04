@@ -25,13 +25,13 @@ int main(int argc, char **argv) {
 		int block_power = 8;
 		if (argc == 3)
 			block_power = atoi(argv[2]);
-		if (block_power < 6 || block_power > POWER)
+		if (block_power < 6 || block_power > BLOCK_POWER)
 			return 1;
 		if (write_bits(block_power - 6, 4))
 			return 1;
 		int block_length = 1 << block_power;
 		int partial = 0;
-		while (!partial && (length = fread(ibuffer, 1, block_length, stdin)) > 0) {
+		while (!partial && (length = fread(iblock, 1, block_length, stdin)) > 0) {
 			read_bytes += length;
 			if (length < block_length) {
 				partial = 1;
@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
 			if (write_bits(row, block_power))
 				return 1;
 			for (int i = 0; i < length; ++i)
-				if (putval(get_value(obuffer[i])))
+				if (putval(get_value(oblock[i])))
 					return 1;
 		}
 		if (!partial) {
@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
 		if (read_bits(&block_power, 4))
 			return 1;
 		block_power += 6;
-		if (block_power < 6 || block_power > POWER)
+		if (block_power < 6 || block_power > BLOCK_POWER)
 			return 1;
 		int block_length = 1 << block_power;
 		int partial = 0;
@@ -83,10 +83,10 @@ int main(int argc, char **argv) {
 				int value = getval();
 				if (value < 0)
 					return 1;
-				ibuffer[i] = get_symbol(value);
+				iblock[i] = get_symbol(value);
 			}
 			ibwt(row);
-			if (length != (int)fwrite(obuffer, 1, length, stdout))
+			if (length != (int)fwrite(oblock, 1, length, stdout))
 				return 1;
 			wrote_bytes += length;
 		}

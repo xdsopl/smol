@@ -8,18 +8,19 @@ Copyright 2025 Ahmet Inan <xdsopl@gmail.com>
 
 #include <stdlib.h>
 
-#define POWER 21
-#define BUFFER (1 << POWER)
+#define ALPHABET_SIZE 256
+#define BLOCK_POWER 21
+#define BLOCK_LENGTH (1 << BLOCK_POWER)
 
 static int length;
-static unsigned char ibuffer[BUFFER], obuffer[BUFFER];
+static unsigned char iblock[BLOCK_LENGTH], oblock[BLOCK_LENGTH];
 
 int compare(const void *a, const void *b) {
 	int x = *(const int *)a;
 	int y = *(const int *)b;
 	for (int i = 0; i < length; ++i) {
-		int l = ibuffer[(x + i) % length];
-		int r = ibuffer[(y + i) % length];
+		int l = iblock[(x + i) % length];
+		int r = iblock[(y + i) % length];
 		if (l < r)
 			return -1;
 		if (l > r)
@@ -29,12 +30,12 @@ int compare(const void *a, const void *b) {
 }
 
 int bwt() {
-	static int rotations[BUFFER];
+	static int rotations[BLOCK_LENGTH];
 	for (int i = 0; i < length; ++i)
 		rotations[i] = i;
 	qsort(rotations, length, sizeof(int), compare);
 	for (int i = 0; i < length; ++i)
-		obuffer[i] = ibuffer[(rotations[i] + length - 1) % length];
+		oblock[i] = iblock[(rotations[i] + length - 1) % length];
 	int row = 0;
 	while (rotations[row])
 		++row;
@@ -42,24 +43,24 @@ int bwt() {
 }
 
 void ibwt(int row) {
-	static int freq[256];
-	for (int i = 0; i < 256; ++i)
+	static int freq[ALPHABET_SIZE];
+	for (int i = 0; i < ALPHABET_SIZE; ++i)
 		freq[i] = 0;
 	for (int i = 0; i < length; ++i)
-		++freq[ibuffer[i]];
-	static int first[256];
-	for (int i = 1; i < 256; ++i)
+		++freq[iblock[i]];
+	static int first[ALPHABET_SIZE];
+	for (int i = 1; i < ALPHABET_SIZE; ++i)
 		first[i] = first[i - 1] + freq[i - 1];
-	static int count[256];
-	for (int i = 0; i < 256; ++i)
+	static int count[ALPHABET_SIZE];
+	for (int i = 0; i < ALPHABET_SIZE; ++i)
 		count[i] = 0;
-	static int last[BUFFER];
+	static int last[BLOCK_LENGTH];
 	for (int i = 0; i < length; ++i)
-		last[i] = ++count[ibuffer[i]];
-	static int lfm[BUFFER];
+		last[i] = ++count[iblock[i]];
+	static int lfm[BLOCK_LENGTH];
 	for (int i = 0; i < length; ++i)
-		lfm[i] = first[ibuffer[i]] + last[i] - 1;
+		lfm[i] = first[iblock[i]] + last[i] - 1;
 	for (int i = length-1; i >= 0; --i, row = lfm[row])
-		obuffer[i] = ibuffer[row];
+		oblock[i] = iblock[row];
 }
 
