@@ -18,16 +18,13 @@ static const int *bwt_input;
 int bwt_compare(const void *a, const void *b) {
 	int x = *(const int *)a;
 	int y = *(const int *)b;
-	for (int i = 0; i < bwt_length; ++i) {
-		int l = bwt_input[(x + i) % bwt_length];
-		int r = bwt_input[(y + i) % bwt_length];
-		if (l != r)
-			return l - r;
-	}
-	return 0;
+	for (; x < bwt_length && y < bwt_length; ++x, ++y)
+		if (bwt_input[x] != bwt_input[y])
+			return bwt_input[x] - bwt_input[y];
+	return y - x;
 }
 
-void bwt_rot(int *output, const int *input, int length) {
+void bwt_sa(int *output, const int *input, int length) {
 	bwt_input = input;
 	bwt_length = length;
 	for (int i = 0; i < length; ++i)
@@ -36,10 +33,10 @@ void bwt_rot(int *output, const int *input, int length) {
 }
 
 int bwt(int *output, const int *input, int length) {
-	static int row, rot[BLOCK_SIZE];
-	bwt_rot(rot, input, length);
+	static int row, sa[BLOCK_SIZE];
+	bwt_sa(sa, input, length);
 	for (int i = 0; i < length; ++i) {
-		int index = rot[i];
+		int index = sa[i];
 		if (index == 0) {
 			index = length;
 			row = i;
