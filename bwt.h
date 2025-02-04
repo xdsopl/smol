@@ -29,7 +29,7 @@ int bwt_compare(const void *a, const void *b) {
 	return 0;
 }
 
-void bwt_sa(int *output, const unsigned char *input, int length) {
+void bwt_rot(int *output, const unsigned char *input, int length) {
 	bwt_input = input;
 	bwt_length = length;
 	for (int i = 0; i < length; ++i)
@@ -38,12 +38,12 @@ void bwt_sa(int *output, const unsigned char *input, int length) {
 }
 
 int bwt(unsigned char *output, const unsigned char *input, int length) {
-	static int sa[BLOCK_SIZE];
-	bwt_sa(sa, input, length);
+	static int rot[BLOCK_SIZE];
+	bwt_rot(rot, input, length);
 	for (int i = 0; i < length; ++i)
-		output[i] = input[(sa[i] + length - 1) % length];
+		output[i] = input[(rot[i] + length - 1) % length];
 	int row = 0;
-	while (sa[row])
+	while (rot[row])
 		++row;
 	return row;
 }
