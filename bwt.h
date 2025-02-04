@@ -49,6 +49,7 @@ void ibwt(int row) {
 	for (int i = 0; i < length; ++i)
 		++freq[iblock[i]];
 	static int first[ALPHABET_SIZE];
+	first[0] = 0;
 	for (int i = 1; i < ALPHABET_SIZE; ++i)
 		first[i] = first[i - 1] + freq[i - 1];
 	static int count[ALPHABET_SIZE];
