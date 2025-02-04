@@ -13,9 +13,9 @@ int putrle(int value) {
 	if (prev == value) {
 		++count;
 	} else if (prev >= 0) {
-		if (putval(prev))
+		if (putval(prev, 0))
 			return -1;
-		if (putval(count))
+		if (putval(count, 1))
 			return -1;
 		count = 0;
 	}
@@ -28,10 +28,10 @@ int getrle() {
 	if (count) {
 		--count;
 	} else {
-		value = getval();
+		value = getval(0);
 		if (value < 0)
 			return -1;
-		count = getval();
+		count = getval(1);
 		if (count < 0)
 			return -1;
 	}
