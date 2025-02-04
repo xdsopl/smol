@@ -52,18 +52,13 @@ void ibwt(unsigned char *output, const unsigned char *input, int length, int row
 	static int freq[ALPHABET_SIZE];
 	for (int i = 0; i < ALPHABET_SIZE; ++i)
 		freq[i] = 0;
+	static int last[BLOCK_SIZE];
 	for (int i = 0; i < length; ++i)
-		++freq[input[i]];
+		last[i] = ++freq[input[i]];
 	static int first[ALPHABET_SIZE];
 	first[0] = 0;
 	for (int i = 1; i < ALPHABET_SIZE; ++i)
 		first[i] = first[i - 1] + freq[i - 1];
-	static int count[ALPHABET_SIZE];
-	for (int i = 0; i < ALPHABET_SIZE; ++i)
-		count[i] = 0;
-	static int last[BLOCK_SIZE];
-	for (int i = 0; i < length; ++i)
-		last[i] = ++count[input[i]];
 	static int lfm[BLOCK_SIZE];
 	for (int i = 0; i < length; ++i)
 		lfm[i] = first[input[i]] + last[i] - 1;
