@@ -21,10 +21,8 @@ int bwt_compare(const void *a, const void *b) {
 	for (int i = 0; i < bwt_length; ++i) {
 		int l = bwt_input[(x + i) % bwt_length];
 		int r = bwt_input[(y + i) % bwt_length];
-		if (l < r)
-			return -1;
-		if (l > r)
-			return 1;
+		if (l != r)
+			return l - r;
 	}
 	return 0;
 }
