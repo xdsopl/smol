@@ -9,7 +9,7 @@ Copyright 2025 Ahmet Inan <xdsopl@gmail.com>
 #include "bwt.h"
 
 int main(int argc, char **argv) {
-	if (argc != 2)
+	if (argc < 2 || argc > 3)
 		return 1;
 	if (*argv[1] == 't') {
 		print_table();
@@ -18,42 +18,66 @@ int main(int argc, char **argv) {
 	if (*argv[1] != 'e' && *argv[1] != 'd')
 		return 1;
 	int enc = *argv[1] == 'e';
+	if (!enc && argc != 2)
+		return 1;
 	init_mtf();
 	if (enc) {
+		int block_power = 8;
+		if (argc == 3)
+			block_power = atoi(argv[2]);
+		if (block_power < 6 || block_power > POWER)
+			return 1;
+		if (write_bits(block_power - 6, 4))
+			return 1;
+		int block_length = 1 << block_power;
 		int partial = 0;
-		while (!partial && (length = fread(ibuffer, 1, BUFFER, stdin)) > 0) {
+		while (!partial && (length = fread(ibuffer, 1, block_length, stdin)) > 0) {
 			read_bytes += length;
-			if (length < BUFFER) {
+			if (length < block_length) {
 				partial = 1;
-				putbit(1);
-				write_bits(length, POWER);
+				if (putbit(1))
+					return 1;
+				if (write_bits(length, block_power))
+					return 1;
 			} else {
-				putbit(0);
+				if (putbit(0))
+					return 1;
 			}
 			int row = bwt();
-			write_bits(row, POWER);
+			if (write_bits(row, block_power))
+				return 1;
 			for (int i = 0; i < length; ++i)
 				if (putval(get_value(obuffer[i])))
 					return 1;
 		}
 		if (!partial) {
-			putbit(1);
-			write_bits(0, POWER);
+			if (putbit(1))
+				return 1;
+			if (write_bits(0, block_power))
+				return 1;
 		}
-		flush_bits();
+		if (flush_bits())
+			return 1;
 	} else {
+		int block_power;
+		if (read_bits(&block_power, 4))
+			return 1;
+		block_power += 6;
+		if (block_power < 6 || block_power > POWER)
+			return 1;
+		int block_length = 1 << block_power;
 		int partial = 0;
 		while (!partial) {
-			length = BUFFER;
+			length = block_length;
 			partial = getbit();
 			if (partial < 0)
 				return 1;
-			if (partial && read_bits(&length, POWER))
+			if (partial && read_bits(&length, block_power))
 				return 1;
 			if (!length)
 				break;
 			int row;
-			if (read_bits(&row, POWER))
+			if (read_bits(&row, block_power))
 				return 1;
 			for (int i = 0; i < length; ++i) {
 				int value = getval();

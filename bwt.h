@@ -8,7 +8,7 @@ Copyright 2025 Ahmet Inan <xdsopl@gmail.com>
 
 #include <stdlib.h>
 
-#define POWER 16
+#define POWER 21
 #define BUFFER (1 << POWER)
 
 static int length;
