@@ -4,6 +4,8 @@ Compression of English text
 Copyright 2025 Ahmet Inan <xdsopl@gmail.com>
 */
 
+#include <stdio.h>
+#include <stdlib.h>
 #include "vli.h"
 #include "mtf.h"
 #include "bwt.h"
@@ -21,6 +23,7 @@ int main(int argc, char **argv) {
 	if (!enc && argc != 2)
 		return 1;
 	init_mtf();
+	static unsigned char input[BLOCK_SIZE], output[BLOCK_SIZE];
 	if (enc) {
 		int block_power = 8;
 		if (argc == 3)
@@ -29,10 +32,11 @@ int main(int argc, char **argv) {
 			return 1;
 		if (write_bits(block_power - 6, 4))
 			return 1;
-		int block_length = 1 << block_power;
+		int block_size = 1 << block_power;
 		int partial = 0;
-		while (!partial && (length = read_bytes(iblock, block_length)) > 0) {
-			if (length < block_length) {
+		int length;
+		while (!partial && (length = read_bytes(input, block_size)) > 0) {
+			if (length < block_size) {
 				partial = 1;
 				if (putbit(1))
 					return 1;
@@ -42,11 +46,11 @@ int main(int argc, char **argv) {
 				if (putbit(0))
 					return 1;
 			}
-			int row = bwt();
+			int row = bwt(output, input, length);
 			if (write_bits(row, block_power))
 				return 1;
 			for (int i = 0; i < length; ++i)
-				if (putval(get_value(oblock[i])))
+				if (putval(get_value(output[i])))
 					return 1;
 		}
 		if (!partial) {
@@ -64,10 +68,10 @@ int main(int argc, char **argv) {
 		block_power += 6;
 		if (block_power < 6 || block_power > BLOCK_POWER)
 			return 1;
-		int block_length = 1 << block_power;
+		int block_size = 1 << block_power;
 		int partial = 0;
 		while (!partial) {
-			length = block_length;
+			int length = block_size;
 			partial = getbit();
 			if (partial < 0)
 				return 1;
@@ -82,10 +86,10 @@ int main(int argc, char **argv) {
 				int value = getval();
 				if (value < 0)
 					return 1;
-				iblock[i] = get_symbol(value);
+				input[i] = get_symbol(value);
 			}
-			ibwt(row);
-			if (write_bytes(oblock, length))
+			ibwt(output, input, length, row);
+			if (write_bytes(output, length))
 				return 1;
 		}
 	}
