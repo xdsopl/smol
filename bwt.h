@@ -35,16 +35,20 @@ void bwt_rot(int *output, const unsigned char *input, int length) {
 	qsort(output, length, sizeof(int), bwt_compare);
 }
 
-int bwt(unsigned char *output, const unsigned char *input, int length) {
-	static int row, rot[BLOCK_SIZE];
-	bwt_rot(rot, input, length);
-	for (int i = 0; i < length; ++i) {
+int bwt(unsigned char *output, unsigned char *input, int length) {
+	static int row, rot[2*BLOCK_SIZE];
+	for (int i = 0, j = length; i < length; ++i, ++j)
+		input[j] = input[i];
+	bwt_rot(rot, input, 2*length);
+	for (int i = 0, j = 0; i < 2*length; ++i) {
 		int index = rot[i];
+		if (index >= length)
+			continue;
 		if (index == 0) {
 			index = length;
-			row = i;
+			row = j;
 		}
-		output[i] = input[index - 1];
+		output[j++] = input[index - 1];
 	}
 	return row;
 }
