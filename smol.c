@@ -31,8 +31,7 @@ int main(int argc, char **argv) {
 			return 1;
 		int block_length = 1 << block_power;
 		int partial = 0;
-		while (!partial && (length = fread(iblock, 1, block_length, stdin)) > 0) {
-			read_bytes += length;
+		while (!partial && (length = read_bytes(iblock, block_length)) > 0) {
 			if (length < block_length) {
 				partial = 1;
 				if (putbit(1))
@@ -86,12 +85,11 @@ int main(int argc, char **argv) {
 				iblock[i] = get_symbol(value);
 			}
 			ibwt(row);
-			if (length != (int)fwrite(oblock, 1, length, stdout))
+			if (write_bytes(oblock, length))
 				return 1;
-			wrote_bytes += length;
 		}
 	}
-	double change = 100.0 * (wrote_bytes - read_bytes) / read_bytes;
-	fprintf(stderr, "%s: %s %d to %d bytes %+.2f%%\n", argv[0], enc ? "encoded" : "decoded", read_bytes, wrote_bytes, change);
+	double change = 100.0 * (bytes_written - bytes_read) / bytes_read;
+	fprintf(stderr, "%s: %s %d to %d bytes %+.2f%%\n", argv[0], enc ? "encoded" : "decoded", bytes_read, bytes_written, change);
 	return 0;
 }

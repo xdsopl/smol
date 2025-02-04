@@ -8,8 +8,8 @@ Copyright 2025 Ahmet Inan <xdsopl@gmail.com>
 
 #include <stdio.h>
 
-static int read_bytes;
-static int wrote_bytes;
+static int bytes_read;
+static int bytes_written;
 
 int getbyte() {
 	int byte = getchar();
@@ -17,7 +17,7 @@ int getbyte() {
 		fprintf(stderr, "reached end of stream\n");
 		return -1;
 	}
-	++read_bytes;
+	++bytes_read;
 	return byte;
 }
 
@@ -26,7 +26,20 @@ int putbyte(int byte) {
 		fprintf(stderr, "could not write to stream\n");
 		return -1;
 	}
-	++wrote_bytes;
+	++bytes_written;
+	return 0;
+}
+
+int read_bytes(unsigned char *buffer, int bytes) {
+	bytes = fread(buffer, 1, bytes, stdin);
+	bytes_read += bytes;
+	return bytes;
+}
+
+int write_bytes(unsigned char *buffer, int bytes) {
+	if (bytes != (int)fwrite(buffer, 1, bytes, stdout))
+		return -1;
+	bytes_written += bytes;
 	return 0;
 }
 
