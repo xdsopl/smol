@@ -8,8 +8,8 @@ Copyright 2025 Ahmet Inan <xdsopl@gmail.com>
 
 #include <stdlib.h>
 
-static int length;
-#define BUFFER 65536
+#define POWER 16
+#define BUFFER (1 << POWER)
 
 static int length;
 static unsigned char ibuffer[BUFFER], obuffer[BUFFER];
@@ -28,16 +28,20 @@ int compare(const void *a, const void *b) {
 	return 0;
 }
 
-void bwt() {
+int bwt() {
 	static int rotations[BUFFER];
 	for (int i = 0; i < length; ++i)
 		rotations[i] = i;
 	qsort(rotations, length, sizeof(int), compare);
 	for (int i = 0; i < length; ++i)
 		obuffer[i] = ibuffer[(rotations[i] + length - 1) % length];
+	int row = 0;
+	while (rotations[row])
+		++row;
+	return row;
 }
 
-void ibwt(int end) {
+void ibwt(int row) {
 	static int freq[256];
 	for (int i = 0; i < 256; ++i)
 		freq[i] = 0;
@@ -55,9 +59,6 @@ void ibwt(int end) {
 	static int lfm[BUFFER];
 	for (int i = 0; i < length; ++i)
 		lfm[i] = first[ibuffer[i]] + last[i] - 1;
-	int row = 0;
-	while (row < length && ibuffer[row] != end)
-		++row;
 	for (int i = length-1; i >= 0; --i, row = lfm[row])
 		obuffer[i] = ibuffer[row];
 }

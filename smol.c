@@ -8,9 +8,6 @@ Copyright 2025 Ahmet Inan <xdsopl@gmail.com>
 #include "mtf.h"
 #include "bwt.h"
 
-#define ETX 3
-#define EOT 4
-
 int main(int argc, char **argv) {
 	if (argc != 2)
 		return 1;
@@ -23,35 +20,52 @@ int main(int argc, char **argv) {
 	int enc = *argv[1] == 'e';
 	init_mtf();
 	if (enc) {
-		while ((length = fread(ibuffer, 1, BUFFER-1, stdin)) > 0) {
+		int partial = 0;
+		while (!partial && (length = fread(ibuffer, 1, BUFFER, stdin)) > 0) {
 			read_bytes += length;
-			ibuffer[length++] = ETX;
-			bwt();
+			if (length < BUFFER) {
+				partial = 1;
+				putbit(1);
+				write_bits(length, POWER);
+			} else {
+				putbit(0);
+			}
+			int row = bwt();
+			write_bits(row, POWER);
 			for (int i = 0; i < length; ++i)
 				if (putval(get_value(obuffer[i])))
 					return 1;
 		}
-		if (putval(get_value(EOT)))
-			return 1;
+		if (!partial) {
+			putbit(1);
+			write_bits(0, POWER);
+		}
 		flush_bits();
 	} else {
-		do {
-			for (length = 0; length < BUFFER; ++length) {
+		int partial = 0;
+		while (!partial) {
+			length = BUFFER;
+			partial = getbit();
+			if (partial < 0)
+				return 1;
+			if (partial && read_bits(&length, POWER))
+				return 1;
+			if (!length)
+				break;
+			int row;
+			if (read_bits(&row, POWER))
+				return 1;
+			for (int i = 0; i < length; ++i) {
 				int value = getval();
 				if (value < 0)
 					return 1;
-				int symbol = get_symbol(value);
-				if (symbol == EOT)
-					break;
-				ibuffer[length] = symbol;
+				ibuffer[i] = get_symbol(value);
 			}
-			if (!length)
-				break;
-			ibwt(ETX);
-			if (length-1 != (int)fwrite(obuffer, 1, length-1, stdout))
+			ibwt(row);
+			if (length != (int)fwrite(obuffer, 1, length, stdout))
 				return 1;
-			wrote_bytes += length-1;
-		} while (length == BUFFER);
+			wrote_bytes += length;
+		}
 	}
 	double change = 100.0 * (wrote_bytes - read_bytes) / read_bytes;
 	fprintf(stderr, "%s: %s %d to %d bytes %+.2f%%\n", argv[0], enc ? "encoded" : "decoded", read_bytes, wrote_bytes, change);
