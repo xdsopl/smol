@@ -14,7 +14,6 @@ Copyright 2025 Ahmet Inan <xdsopl@gmail.com>
 
 static int bwt_length;
 static const unsigned char *bwt_input;
-static unsigned char *bwt_output;
 
 int bwt_compare(const void *a, const void *b) {
 	int x = *(const int *)a;
@@ -30,18 +29,21 @@ int bwt_compare(const void *a, const void *b) {
 	return 0;
 }
 
-int bwt(unsigned char *output, const unsigned char *input, int length) {
-	bwt_output = output;
+void bwt_sa(int *output, const unsigned char *input, int length) {
 	bwt_input = input;
 	bwt_length = length;
-	static int rotations[BLOCK_SIZE];
 	for (int i = 0; i < length; ++i)
-		rotations[i] = i;
-	qsort(rotations, length, sizeof(int), bwt_compare);
+		output[i] = i;
+	qsort(output, length, sizeof(int), bwt_compare);
+}
+
+int bwt(unsigned char *output, const unsigned char *input, int length) {
+	static int sa[BLOCK_SIZE];
+	bwt_sa(sa, input, length);
 	for (int i = 0; i < length; ++i)
-		output[i] = input[(rotations[i] + length - 1) % length];
+		output[i] = input[(sa[i] + length - 1) % length];
 	int row = 0;
-	while (rotations[row])
+	while (sa[row])
 		++row;
 	return row;
 }
