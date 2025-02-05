@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
 			if (write_bits(row, block_power))
 				return 1;
 			for (int i = 0; i < length; ++i)
-				if (putval(get_value(output[i])))
+				if (putval(mtf_value(output[i])))
 					return 1;
 		}
 		if (!partial) {
@@ -86,7 +86,7 @@ int main(int argc, char **argv) {
 				int value = getval();
 				if (value < 0)
 					return 1;
-				input[i] = get_symbol(value);
+				input[i] = mtf_symbol(value);
 			}
 			ibwt(output, input, length, row);
 			if (write_bytes(output, length))

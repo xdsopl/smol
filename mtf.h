@@ -36,13 +36,13 @@ void move_to_front(int symbol) {
 	itable[table[0] = symbol] = 0;
 }
 
-int get_symbol(int value) {
+int mtf_symbol(int value) {
 	int symbol = table[value];
 	move_to_front(symbol);
 	return symbol;
 }
 
-int get_value(int symbol) {
+int mtf_value(int symbol) {
 	int value = itable[symbol];
 	move_to_front(symbol);
 	return value;
