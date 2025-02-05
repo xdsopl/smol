@@ -54,8 +54,9 @@ void ibwt(unsigned char *output, const unsigned char *input, int length, int row
 	for (int i = 0; i < length; ++i)
 		pref[i] = count[input[i]]++;
 	for (int i = 0, sum = 0; i < ALPHABET_SIZE; ++i) {
-		sum += count[i];
-		count[i] = sum - count[i];
+		int tmp = count[i] + sum;
+		count[i] = sum;
+		sum = tmp;
 	}
 	for (int i = length-1; i >= 0; --i) {
 		output[i] = input[row];
