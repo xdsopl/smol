@@ -36,13 +36,16 @@ void bwt_rot(int *output, const unsigned char *input, int length) {
 }
 
 int bwt(unsigned char *output, const unsigned char *input, int length) {
-	static int rot[BLOCK_SIZE];
+	static int row, rot[BLOCK_SIZE];
 	bwt_rot(rot, input, length);
-	for (int i = 0; i < length; ++i)
-		output[i] = input[(rot[i] + length - 1) % length];
-	int row = 0;
-	while (rot[row])
-		++row;
+	for (int i = 0; i < length; ++i) {
+		int index = rot[i];
+		if (index == 0) {
+			index = length;
+			row = i;
+		}
+		output[i] = input[index - 1];
+	}
 	return row;
 }
 
