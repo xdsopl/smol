@@ -20,7 +20,7 @@ int putval(int val, int ctx) {
 		return -1;
 	if (write_bits(val, order[ctx]))
 		return -1;
-	order[ctx] -= 1;
+	order[ctx] -= 1 + ctx;
 	if (order[ctx] < 0)
 		order[ctx] = 0;
 	return 0;
@@ -37,7 +37,7 @@ int getval(int ctx) {
 		return -1;
 	if (read_bits(&val, order[ctx]))
 		return -1;
-	order[ctx] -= 1;
+	order[ctx] -= 1 + ctx;
 	if (order[ctx] < 0)
 		order[ctx] = 0;
 	return val + sum;
