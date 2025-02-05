@@ -36,20 +36,23 @@ void bwt_rot(int *output, const unsigned char *input, int length) {
 }
 
 int bwt(unsigned char *output, const unsigned char *input, int length) {
-	static int row, rot[BLOCK_SIZE];
+	for (int i = 0; i < length-1; ++i)
+		if (!input[i])
+			return 1;
+	if (input[length-1])
+		return 1;
+	static int rot[BLOCK_SIZE];
 	bwt_rot(rot, input, length);
 	for (int i = 0; i < length; ++i) {
 		int index = rot[i];
-		if (index == 0) {
+		if (index == 0)
 			index = length;
-			row = i;
-		}
 		output[i] = input[index - 1];
 	}
-	return row;
+	return 0;
 }
 
-void ibwt(unsigned char *output, const unsigned char *input, int length, int row) {
+int ibwt(unsigned char *output, const unsigned char *input, int length) {
 	static int count[ALPHABET_SIZE];
 	for (int i = 0; i < ALPHABET_SIZE; ++i)
 		count[i] = 0;
@@ -61,9 +64,21 @@ void ibwt(unsigned char *output, const unsigned char *input, int length, int row
 		count[i] = sum;
 		sum = tmp;
 	}
+	int row = -1;
+	for (int i = 0; i < length; ++i) {
+		if (!input[i]) {
+			// there can be only one
+			if (row >= 0)
+				return 1;
+			row = i;
+		}
+	}
+	if (row < 0)
+		return 1;
 	for (int i = length-1; i >= 0; --i) {
 		output[i] = input[row];
 		row = pref[row] + count[input[row]];
 	}
+	return 0;
 }
 
