@@ -47,20 +47,19 @@ int bwt(unsigned char *output, const unsigned char *input, int length) {
 }
 
 void ibwt(unsigned char *output, const unsigned char *input, int length, int row) {
-	static int freq[ALPHABET_SIZE];
+	static int count[ALPHABET_SIZE];
 	for (int i = 0; i < ALPHABET_SIZE; ++i)
-		freq[i] = 0;
-	static int last[BLOCK_SIZE];
+		count[i] = 0;
+	static int pref[BLOCK_SIZE];
 	for (int i = 0; i < length; ++i)
-		last[i] = ++freq[input[i]];
-	static int first[ALPHABET_SIZE];
-	first[0] = 0;
-	for (int i = 1; i < ALPHABET_SIZE; ++i)
-		first[i] = first[i - 1] + freq[i - 1];
-	static int lfm[BLOCK_SIZE];
-	for (int i = 0; i < length; ++i)
-		lfm[i] = first[input[i]] + last[i] - 1;
-	for (int i = length-1; i >= 0; --i, row = lfm[row])
+		pref[i] = count[input[i]]++;
+	for (int i = 0, sum = 0; i < ALPHABET_SIZE; ++i) {
+		sum += count[i];
+		count[i] = sum - count[i];
+	}
+	for (int i = length-1; i >= 0; --i) {
 		output[i] = input[row];
+		row = pref[row] + count[input[row]];
+	}
 }
 
