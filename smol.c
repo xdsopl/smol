@@ -7,7 +7,6 @@ Copyright 2025 Ahmet Inan <xdsopl@gmail.com>
 #include <stdio.h>
 #include <stdlib.h>
 #include "rle.h"
-#include "mtf.h"
 #include "bwt.h"
 
 int main(int argc, char **argv) {
@@ -50,7 +49,7 @@ int main(int argc, char **argv) {
 			if (write_bits(row, block_power))
 				return 1;
 			for (int i = 0; i < length; ++i)
-				if (putrle(mtf_value(output[i])))
+				if (putrle(output[i]))
 					return 1;
 			if (putrle(-1))
 				return 1;
@@ -88,7 +87,7 @@ int main(int argc, char **argv) {
 				int value = getrle();
 				if (value < 0)
 					return 1;
-				input[i] = mtf_symbol(value);
+				input[i] = value;
 			}
 			ibwt(output, input, length, row);
 			if (write_bytes(output, length))
