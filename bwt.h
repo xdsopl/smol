@@ -12,24 +12,40 @@ Copyright 2025 Ahmet Inan <xdsopl@gmail.com>
 #define BLOCK_POWER 21
 #define BLOCK_SIZE (1 << BLOCK_POWER)
 
-static int bwt_length;
-static const unsigned char *bwt_input;
+static int rank[2*BLOCK_SIZE], next[2*BLOCK_SIZE];
 
 int bwt_compare(const void *a, const void *b) {
 	int x = *(const int *)a;
 	int y = *(const int *)b;
-	for (; x < bwt_length && y < bwt_length; ++x, ++y)
-		if (bwt_input[x] != bwt_input[y])
-			return bwt_input[x] - bwt_input[y];
-	return y - x;
+	if (rank[x] != rank[y])
+		return rank[x] - rank[y];
+	return next[x] - next[y];
 }
 
-void bwt_sa(int *output, const unsigned char *input, int length) {
-	bwt_input = input;
-	bwt_length = length;
-	for (int i = 0; i < length; ++i)
-		output[i] = i;
-	qsort(output, length, sizeof(int), bwt_compare);
+void bwt_sa(int *sa, const unsigned char *input, int length) {
+	for (int i = 0; i < length; ++i) {
+		sa[i] = i;
+		rank[i] = input[i];
+		next[i] = (i + 1 < length) ? input[i + 1] : -1;
+	}
+	qsort(sa, length, sizeof(int), bwt_compare);
+	for (int k = 2; k < length; k *= 2) {
+		static int temp[2*BLOCK_SIZE];
+		int current = 0;
+		temp[sa[0]] = 0;
+		for (int i = 1; i < length; ++i) {
+			if (rank[sa[i]] != rank[sa[i - 1]] || next[sa[i]] != next[sa[i - 1]])
+				++current;
+			temp[sa[i]] = current;
+		}
+		for (int i = 0; i < length; ++i) {
+			rank[sa[i]] = temp[sa[i]];
+			next[sa[i]] = (sa[i] + k < length) ? temp[sa[i] + k] : -1;
+		}
+		qsort(sa, length, sizeof(int), bwt_compare);
+		if (current == length - 1)
+			break;
+	}
 }
 
 int bwt(unsigned char *output, unsigned char *input, int length) {
