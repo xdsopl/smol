@@ -6,33 +6,27 @@ Copyright 2025 Ahmet Inan <xdsopl@gmail.com>
 
 #pragma once
 
-#include <stdlib.h>
-
 #define ALPHABET_SIZE 256
 #define BLOCK_POWER 21
 #define BLOCK_SIZE (1 << BLOCK_POWER)
 
-static int bwt_length;
-static const unsigned char *bwt_input;
-
-int bwt_compare(const void *a, const void *b) {
-	int x = *(const int *)a;
-	int y = *(const int *)b;
-	for (int i = 0; i < bwt_length; ++i) {
-		int l = bwt_input[(x + i) % bwt_length];
-		int r = bwt_input[(y + i) % bwt_length];
-		if (l != r)
-			return l - r;
-	}
-	return 0;
-}
-
 void bwt_rot(int *output, const unsigned char *input, int length) {
-	bwt_input = input;
-	bwt_length = length;
 	for (int i = 0; i < length; ++i)
 		output[i] = i;
-	qsort(output, length, sizeof(int), bwt_compare);
+	for (int j = length - 1; j >= 0; --j) {
+		static int count[ALPHABET_SIZE];
+		for (int i = 0; i < ALPHABET_SIZE; ++i)
+			count[i] = 0;
+		for (int i = 0; i < length; ++i)
+			++count[input[(output[i] + j) % length]];
+		for (int i = 1; i < ALPHABET_SIZE; ++i)
+			count[i] += count[i - 1];
+		static int temp[BLOCK_SIZE];
+		for (int i = length - 1; i >= 0; --i)
+			temp[--count[input[(output[i] + j) % length]]] = output[i];
+		for (int i = 0; i < length; ++i)
+			output[i] = temp[i];
+	}
 }
 
 int bwt(unsigned char *output, const unsigned char *input, int length) {
