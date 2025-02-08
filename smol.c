@@ -34,8 +34,8 @@ int main(int argc, char **argv) {
 		int block_size = 1 << block_power;
 		int partial = 0;
 		int length;
-		while (!partial && (length = read_bytes(input, block_size)) > 0) {
-			if (length < block_size) {
+		while (!partial && (length = read_bytes(input, block_size-1)) > 0) {
+			if (length < block_size-1) {
 				partial = 1;
 				if (putbit(1))
 					return 1;
@@ -45,11 +45,14 @@ int main(int argc, char **argv) {
 				if (putbit(0))
 					return 1;
 			}
-			int row = bwt(output, input, length);
+			for (int i = 0; i < length; ++i)
+				++input[i];
+			input[length] = 0;
+			int row = bwt(output, input, length+1);
 			if (write_bits(row, block_power))
 				return 1;
-			for (int i = 0; i < length; ++i)
-				if (putrle(output[i]))
+			for (int i = 0; i <= length; ++i)
+				if (i != row && putrle(output[i] - 1))
 					return 1;
 			if (putrle(-1))
 				return 1;
@@ -72,7 +75,7 @@ int main(int argc, char **argv) {
 		int block_size = 1 << block_power;
 		int partial = 0;
 		while (!partial) {
-			int length = block_size;
+			int length = block_size-1;
 			partial = getbit();
 			if (partial < 0)
 				return 1;
@@ -83,13 +86,15 @@ int main(int argc, char **argv) {
 			int row;
 			if (read_bits(&row, block_power))
 				return 1;
-			for (int i = 0; i < length; ++i) {
-				int value = getrle();
-				if (value < 0)
+			for (int i = 0; i <= length; ++i) {
+				int value = 0;
+				if (i != row && (value = getrle() + 1) <= 0)
 					return 1;
 				input[i] = value;
 			}
-			ibwt(output, input, length, row);
+			ibwt(output, input, length+1, row);
+			for (int i = 0; i < length; ++i)
+				--output[i];
 			if (write_bytes(output, length))
 				return 1;
 		}

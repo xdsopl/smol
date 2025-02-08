@@ -8,7 +8,7 @@ Copyright 2025 Ahmet Inan <xdsopl@gmail.com>
 
 #include <stdlib.h>
 
-#define ALPHABET_SIZE 256
+#define ALPHABET_SIZE 257
 #define BLOCK_POWER 21
 #define BLOCK_SIZE (1 << BLOCK_POWER)
 
