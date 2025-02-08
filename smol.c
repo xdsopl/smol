@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
 	if (!enc && argc != 2)
 		return 1;
 	init_mtf();
-	static unsigned char input[BLOCK_SIZE], output[BLOCK_SIZE];
+	static int input[BLOCK_SIZE], output[BLOCK_SIZE];
 	if (enc) {
 		int block_power = 8;
 		if (argc == 3)

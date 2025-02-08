@@ -30,16 +30,21 @@ int putbyte(int byte) {
 	return 0;
 }
 
-int read_bytes(unsigned char *buffer, int bytes) {
-	bytes = fread(buffer, 1, bytes, stdin);
-	bytes_read += bytes;
-	return bytes;
+int read_bytes(int *buffer, int bytes) {
+	int count = 0;
+	while (bytes--) {
+		int byte = getbyte();
+		if (byte < 0)
+			return count;
+		buffer[count++] = byte;
+	}
+	return count;
 }
 
-int write_bytes(unsigned char *buffer, int bytes) {
-	if (bytes != (int)fwrite(buffer, 1, bytes, stdout))
-		return -1;
-	bytes_written += bytes;
+int write_bytes(const int *buffer, int bytes) {
+	while (bytes--)
+		if (putbyte(*buffer++))
+			return 1;
 	return 0;
 }
 

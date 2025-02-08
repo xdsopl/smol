@@ -13,7 +13,7 @@ Copyright 2025 Ahmet Inan <xdsopl@gmail.com>
 #define BLOCK_SIZE (1 << BLOCK_POWER)
 
 static int bwt_length;
-static const unsigned char *bwt_input;
+static const int *bwt_input;
 
 int bwt_compare(const void *a, const void *b) {
 	int x = *(const int *)a;
@@ -27,7 +27,7 @@ int bwt_compare(const void *a, const void *b) {
 	return 0;
 }
 
-void bwt_rot(int *output, const unsigned char *input, int length) {
+void bwt_rot(int *output, const int *input, int length) {
 	bwt_input = input;
 	bwt_length = length;
 	for (int i = 0; i < length; ++i)
@@ -35,7 +35,7 @@ void bwt_rot(int *output, const unsigned char *input, int length) {
 	qsort(output, length, sizeof(int), bwt_compare);
 }
 
-int bwt(unsigned char *output, const unsigned char *input, int length) {
+int bwt(int *output, const int *input, int length) {
 	static int row, rot[BLOCK_SIZE];
 	bwt_rot(rot, input, length);
 	for (int i = 0; i < length; ++i) {
@@ -49,7 +49,7 @@ int bwt(unsigned char *output, const unsigned char *input, int length) {
 	return row;
 }
 
-void ibwt(unsigned char *output, const unsigned char *input, int length, int row) {
+void ibwt(int *output, const int *input, int length, int row) {
 	static int count[ALPHABET_SIZE];
 	for (int i = 0; i < ALPHABET_SIZE; ++i)
 		count[i] = 0;
