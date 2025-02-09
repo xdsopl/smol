@@ -4,10 +4,13 @@ Compression of English text
 Copyright 2025 Ahmet Inan <xdsopl@gmail.com>
 */
 
+#include <divsufsort.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "rle.h"
-#include "bwt.h"
+
+#define BLOCK_POWER 21
+#define BLOCK_SIZE (1 << BLOCK_POWER)
 
 int main(int argc, char **argv) {
 	if (argc < 2 || argc > 3)
@@ -45,8 +48,10 @@ int main(int argc, char **argv) {
 				if (putbit(0))
 					return 1;
 			}
-			int row = bwt(output, input, length);
-			if (write_bits(row, block_power))
+			int row;
+			if (bw_transform(input, output, 0, length, &row))
+				return 1;
+			if (write_bits(row, block_power+1))
 				return 1;
 			for (int i = 0; i < length; ++i)
 				if (putrle(output[i]))
@@ -81,7 +86,7 @@ int main(int argc, char **argv) {
 			if (!length)
 				break;
 			int row;
-			if (read_bits(&row, block_power))
+			if (read_bits(&row, block_power+1))
 				return 1;
 			for (int i = 0; i < length; ++i) {
 				int value = getrle();
@@ -89,7 +94,8 @@ int main(int argc, char **argv) {
 					return 1;
 				input[i] = value;
 			}
-			ibwt(output, input, length, row);
+			if (inverse_bw_transform(input, output, 0, length, row))
+				return 1;
 			if (write_bytes(output, length))
 				return 1;
 		}
