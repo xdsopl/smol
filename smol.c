@@ -37,8 +37,8 @@ int main(int argc, char **argv) {
 		int block_size = 1 << block_power;
 		int partial = 0;
 		int length;
-		while (!partial && (length = read_bytes(input, block_size)) > 0) {
-			if (length < block_size) {
+		while (!partial && (length = read_bytes(input, block_size-1)) > 0) {
+			if (length < block_size-1) {
 				partial = 1;
 				if (putbit(1))
 					return 1;
@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
 			int row;
 			if (bw_transform(input, output, 0, length, &row))
 				return 1;
-			if (write_bits(row, block_power+1))
+			if (write_bits(row, block_power))
 				return 1;
 			for (int i = 0; i < length; ++i)
 				if (putrle(output[i]))
@@ -77,7 +77,7 @@ int main(int argc, char **argv) {
 		int block_size = 1 << block_power;
 		int partial = 0;
 		while (!partial) {
-			int length = block_size;
+			int length = block_size-1;
 			partial = getbit();
 			if (partial < 0)
 				return 1;
@@ -86,7 +86,7 @@ int main(int argc, char **argv) {
 			if (!length)
 				break;
 			int row;
-			if (read_bits(&row, block_power+1))
+			if (read_bits(&row, block_power))
 				return 1;
 			for (int i = 0; i < length; ++i) {
 				int value = getrle();
