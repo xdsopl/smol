@@ -9,7 +9,7 @@ Copyright 2025 Ahmet Inan <xdsopl@gmail.com>
 #include <stdlib.h>
 
 #define ALPHABET_SIZE 256
-#define BLOCK_POWER 21
+#define BLOCK_POWER 11
 #define BLOCK_SIZE (1 << BLOCK_POWER)
 
 static int bwt_length;

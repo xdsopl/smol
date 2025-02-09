@@ -27,9 +27,9 @@ int main(int argc, char **argv) {
 		int block_power = 8;
 		if (argc == 3)
 			block_power = atoi(argv[2]);
-		if (block_power < 6 || block_power > BLOCK_POWER)
+		if (block_power < 8 || block_power > BLOCK_POWER)
 			return 1;
-		if (write_bits(block_power - 6, 4))
+		if (write_bits(block_power - 8, 2))
 			return 1;
 		int block_size = 1 << block_power;
 		int partial = 0;
@@ -64,10 +64,10 @@ int main(int argc, char **argv) {
 			return 1;
 	} else {
 		int block_power;
-		if (read_bits(&block_power, 4))
+		if (read_bits(&block_power, 2))
 			return 1;
-		block_power += 6;
-		if (block_power < 6 || block_power > BLOCK_POWER)
+		block_power += 8;
+		if (block_power < 8 || block_power > BLOCK_POWER)
 			return 1;
 		int block_size = 1 << block_power;
 		int partial = 0;
