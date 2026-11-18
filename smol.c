@@ -86,7 +86,7 @@ int main(int argc, char **argv) {
 			if (row >= length)
 				return 1;
 			for (int i = 0; i < length; ++i) {
-				int value = getrle();
+				int value = getrle(length - i);
 				if (value < 0)
 					return 1;
 				input[i] = value;
