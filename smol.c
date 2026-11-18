@@ -83,6 +83,8 @@ int main(int argc, char **argv) {
 			int row;
 			if (read_bits(&row, block_power))
 				return 1;
+			if (row >= length)
+				return 1;
 			for (int i = 0; i < length; ++i) {
 				int value = getrle();
 				if (value < 0)
