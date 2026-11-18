@@ -26,12 +26,14 @@ int putval(int val, int ctx) {
 	return 0;
 }
 
-int getval(int ctx) {
+int getval(int ctx, int max) {
 	static int order[2];
 	int val, sum = 0, ret;
 	while ((ret = getbit()) == 0) {
 		sum += 1 << order[ctx];
 		order[ctx] += 1;
+		if (sum > max)
+			return -1;
 	}
 	if (ret < 0)
 		return -1;

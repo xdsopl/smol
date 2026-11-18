@@ -8,6 +8,7 @@ Copyright 2025 Ahmet Inan <xdsopl@gmail.com>
 
 #include "mtf.h"
 #include "vli.h"
+#include "bwt.h"
 
 int putrle(int value) {
 	static int prev = -1, count;
@@ -29,13 +30,13 @@ int getrle() {
 	if (count) {
 		--count;
 	} else {
-		value = getval(0);
+		value = getval(0, 255);
 		if (value < 0)
 			return -1;
 		if (value > 255)
 			return -1;
 		value = mtf_symbol(value);
-		count = getval(1);
+		count = getval(1, BLOCK_SIZE - 1);
 		if (count < 0)
 			return -1;
 	}
