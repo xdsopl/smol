@@ -32,6 +32,8 @@ int getrle() {
 		value = getval(0);
 		if (value < 0)
 			return -1;
+		if (value > 255)
+			return -1;
 		value = mtf_symbol(value);
 		count = getval(1);
 		if (count < 0)
